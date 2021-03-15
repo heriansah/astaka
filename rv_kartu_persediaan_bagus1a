@@ -1,0 +1,32 @@
+SELECT a.ad_client_id, 
+a.ad_org_id, 
+a.m_product_id, 
+a.m_product_id_transaction, 
+a.name, 
+a.description, 
+a.value_d, 
+a.uomsymbol, 
+b.saldo_awal, 
+b.plus, 
+b.min, 
+SUM(a.saldo_akhir) AS saldo_akhir
+--movementdate
+	FROM adempiere.rv_kartu_persediaan_bagus1 a
+	JOIN (SELECT m_product_id, 
+		  movementdate,
+		  saldo_awal,
+		  plus,
+		  min FROM rv_kartu_persediaan_bagus1 WHERE movementdate = '2020-01-31')b ON a.m_product_id = b.m_product_id
+	WHERE a.m_product_id = 1000858 AND a.movementdate <= '2020-01-31'
+	GROUP BY ad_client_id, 
+ad_org_id, 
+a.m_product_id, 
+m_product_id_transaction, 
+name, 
+description, 
+value_d, 
+uomsymbol,
+b.saldo_awal, 
+b.plus, 
+b.min
+--movementdate;
