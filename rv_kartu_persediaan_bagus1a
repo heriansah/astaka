@@ -1,3 +1,37 @@
+SELECT ad_client_id, 
+ad_org_id, 
+m_product_id, 
+m_product_id_transaction, 
+name, 
+description, 
+value_d, 
+uomsymbol, 
+saldo_awal, 
+plus, 
+min, 
+saldo_akhir, 
+movementdate
+	
+FROM
+((SELECT NULL AS ad_client_id, 
+NULL AS ad_org_id, 
+NULL AS m_product_id, 
+NULL AS m_product_id_transaction, 
+NULL AS name, 
+NULL AS description, 
+NULL AS value_d, 
+NULL AS uomsymbol, 
+NULL AS saldo_awal, 
+NULL AS plus, 
+NULL AS min, 
+NULL AS saldo_akhir, 
+CURRENT_DATE + i AS movementdate
+from generate_series(date '2020-01-31'- CURRENT_DATE, 
+     date '2020-01-31' - CURRENT_DATE ) i
+	  
+
+UNION ALL
+
 SELECT a.ad_client_id, 
 a.ad_org_id, 
 a.m_product_id, 
@@ -9,24 +43,28 @@ a.uomsymbol,
 b.saldo_awal, 
 b.plus, 
 b.min, 
-SUM(a.saldo_akhir) AS saldo_akhir
---movementdate
+SUM(a.saldo_akhir) AS saldo_akhir,
+MAX(a.movementdate) AS movementdate
 	FROM adempiere.rv_kartu_persediaan_bagus1 a
 	JOIN (SELECT m_product_id, 
 		  movementdate,
 		  saldo_awal,
 		  plus,
-		  min FROM rv_kartu_persediaan_bagus1 WHERE movementdate = '2020-01-31')b ON a.m_product_id = b.m_product_id
+		  min FROM rv_kartu_persediaan_bagus1 )b ON a.m_product_id = b.m_product_id
+	--RIGHT JOIN rv_kartu_persediaan_tgl c ON a.movementdate = c.movementdate 
 	WHERE a.m_product_id = 1000858 AND a.movementdate <= '2020-01-31'
-	GROUP BY ad_client_id, 
-ad_org_id, 
+	GROUP BY a.ad_client_id, 
+a.ad_org_id, 
 a.m_product_id, 
-m_product_id_transaction, 
-name, 
-description, 
-value_d, 
-uomsymbol,
+a.m_product_id_transaction, 
+a.name, 
+a.description, 
+a.value_d, 
+a.uomsymbol,
 b.saldo_awal, 
 b.plus, 
-b.min
---movementdate;
+b.min)) a
+
+--movementdate
+
+ORDER BY movementdate;
